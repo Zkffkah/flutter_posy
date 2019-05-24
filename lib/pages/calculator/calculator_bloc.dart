@@ -1,9 +1,8 @@
 import 'dart:async';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter_posy/bloc/bloc_provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:decimal/decimal.dart';
-
 
 class CalculatorBloc implements BlocBase {
   static final int defaultMaxRisk = 2;
@@ -26,36 +25,55 @@ class CalculatorBloc implements BlocBase {
 
   Function(int) get changeMaxRisk => _maxRiskController.sink.add;
 
-  final _positionSizeController = BehaviorSubject<double>(
-      seedValue: defaultPositionSize);
+  final _positionSizeController =
+      BehaviorSubject<double>(seedValue: defaultPositionSize);
 
   Stream<double> get positionSize => _positionSizeController.stream;
 
   Function(double) get changePositionSize => _positionSizeController.sink.add;
 
-
-  final _entryPriceController = BehaviorSubject<double>(
-      seedValue: defaultEntryPrice);
+  final _entryPriceController =
+      BehaviorSubject<double>(seedValue: defaultEntryPrice);
 
   Stream<double> get entryPrice => _entryPriceController.stream;
 
   Function(double) get changeEntryPrice => _entryPriceController.sink.add;
 
-
-  final _stopPriceController = BehaviorSubject<double>(
-      seedValue: defaultStopPrice);
+  final _stopPriceController =
+      BehaviorSubject<double>(seedValue: defaultStopPrice);
 
   Stream<double> get stopPrice => _stopPriceController.stream;
 
   Function(double) get changeStopPrice => _stopPriceController.sink.add;
 
-
-  final _targetPriceController = BehaviorSubject<double>(
-      seedValue: defaultTargetPrice);
+  final _targetPriceController =
+      BehaviorSubject<double>(seedValue: defaultTargetPrice);
 
   Stream<double> get targetPrice => _targetPriceController.stream;
 
   Function(double) get changeTargetPrice => _targetPriceController.sink.add;
+
+  final _errorMsgController = BehaviorSubject<String>();
+
+  Stream<String> get errorMsg => _errorMsgController.stream;
+
+  Stream<bool> get priceValid =>
+      Observable.combineLatest3(entryPrice, stopPrice, targetPrice,
+          (entryPrice, stopPrice, targetPrice) {
+        if (targetPrice <= entryPrice) {
+          _errorMsgController
+              .addError("Entry price must lower than target price");
+        }
+
+        if (stopPrice >= entryPrice) {
+          _errorMsgController
+              .addError("Entry price must higher than stop price");
+        }
+        if (entryPrice > stopPrice && entryPrice < targetPrice) {
+          _errorMsgController.add("success");
+        }
+        return entryPrice > stopPrice && entryPrice < targetPrice;
+      });
 
   Decimal unitsToBuy;
   Decimal positionCost;
@@ -70,27 +88,29 @@ class CalculatorBloc implements BlocBase {
     print(_stopPriceController.value);
     print(_targetPriceController.value);
 
-    Decimal riskPercentage = Decimal.parse(_maxRiskController.value.toString()) / Decimal.fromInt(100);
-    Decimal positionSize = Decimal.parse(_positionSizeController.value.toString());
+    Decimal riskPercentage =
+        Decimal.parse(_maxRiskController.value.toString()) /
+            Decimal.fromInt(100);
+    Decimal positionSize =
+        Decimal.parse(_positionSizeController.value.toString());
     Decimal entryPrice = Decimal.parse(_entryPriceController.value.toString());
-    Decimal targetPrice = Decimal.parse(_targetPriceController.value.toString());
+    Decimal targetPrice =
+        Decimal.parse(_targetPriceController.value.toString());
     Decimal stopPrice = Decimal.parse(_stopPriceController.value.toString());
 
     unitsToBuy = riskPercentage * positionSize / (entryPrice - stopPrice);
     positionCost = unitsToBuy * entryPrice;
     positionRisk = riskPercentage * positionSize;
     targetGain = unitsToBuy * (targetPrice - entryPrice);
-    gainPercent = (targetGain / positionCost)*Decimal.fromInt(100);
+    gainPercent = (targetGain / positionCost) * Decimal.fromInt(100);
     print(unitsToBuy);
     print(positionCost);
     print(positionRisk);
     print(targetGain);
     print(gainPercent);
-
   }
 
-  CalculatorBloc() {
-  }
+  CalculatorBloc() {}
 
   @override
   void dispose() {
@@ -100,6 +120,4 @@ class CalculatorBloc implements BlocBase {
     _targetPriceController.close();
     _maxRiskController.close();
   }
-
-
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_posy/bloc/bloc_provider.dart';
 import 'package:flutter_posy/pages/calculator/calculator_bloc.dart';
 import 'package:flutter_posy/utils/DecimalTextInputFormatter.dart';
+import 'package:flutter_posy/widgets/RadioItem.dart';
+import 'package:flutter_posy/widgets/ResultItem.dart';
 
 class Calculator extends StatelessWidget {
   @override
@@ -44,24 +46,53 @@ class Calculator extends StatelessWidget {
           child: ListView(children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: StreamBuilder(
-                  stream: _calculatorBloc.maxRisk,
-                  builder: (context, snapshot) {
-                    return TextField(
-                      controller: _maxRiskTc,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        DecimalTextInputFormatter(decimalRange: 1)
-                      ],
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(10.0),
-                        labelText: 'Max Risk %',
-                      ),
-                      onChanged: (value) {
-                        _calculatorBloc.changeMaxRisk(int.parse(value));
-                      },
-                    );
-                  }),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 5,
+                    child: StreamBuilder(
+                        stream: _calculatorBloc.maxRisk,
+                        builder: (context, snapshot) {
+                          return TextField(
+                            controller: _maxRiskTc,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              DecimalTextInputFormatter(decimalRange: 1)
+                            ],
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10.0),
+                              labelText: 'Max Risk %',
+                            ),
+                            onChanged: (value) {
+                              _calculatorBloc
+                                  .changeMaxRisk(double.parse(value));
+                            },
+                          );
+                        }),
+                  ),
+                  Expanded(
+                      flex: 2,
+                      child: RadioItem(RadioModel(false, '0.5%', () {
+                        _maxRiskTc.text = '0.5';
+                        _calculatorBloc
+                            .changeMaxRisk(0.5);
+                      }))),
+                  Expanded(
+                      flex: 2,
+                      child: RadioItem(RadioModel(false, '1%', () {
+                        _maxRiskTc.text = '1';
+                        _calculatorBloc
+                            .changeMaxRisk(1);
+                      }))),
+                  Expanded(
+                      flex: 2,
+                      child: RadioItem(RadioModel(false, '2%', () {
+                        _maxRiskTc.text = '2';
+                        _calculatorBloc
+                            .changeMaxRisk(2);
+                      }))),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -162,17 +193,14 @@ class Calculator extends StatelessWidget {
           stream: _calculatorBloc.priceValid,
           builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
             return FloatingActionButton(
-                child: Icon(Icons.send, color: Colors.white),
-                onPressed: () {
-                  if (snapshot.error) {
-                    Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text(snapshot.error)));
-                  } else {
-                    // launch the registration process
-                    _calculatorBloc.calculate();
-                    goToDialog(context, _calculatorBloc);
-                  }
-                });
+                child: Icon(Icons.show_chart, color: Colors.white),
+                onPressed: !(snapshot.data)
+                    ? () {}
+                    : () {
+                        // launch the registration process
+                        _calculatorBloc.calculate();
+                        goToDialog(context, _calculatorBloc);
+                      });
           }),
     );
   }
@@ -220,25 +248,15 @@ class Calculator extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                ListTile(
-                  title: Text("Suggessted Quantity"),
-                  trailing: Text("${calculatorBloc.unitsToBuy} units"),
-                ),
-                ListTile(
-                  title: Text("Position Cost"),
-                  trailing: Text("${calculatorBloc.positionCost}"),
-                ),
-                ListTile(
-                  title: Text("Position Risk"),
-                  trailing: Text("${calculatorBloc.positionRisk}"),
-                ),
-                ListTile(
-                  title: Text("Target Gain"),
-                  trailing: Text(
-                      "${calculatorBloc.targetGain} (${calculatorBloc.gainPercent}%)"),
-                ),
+                ResultItem("Suggessted Quantity",
+                    "${calculatorBloc.unitsToBuy} units"),
+                ResultItem("Position Cost", "${calculatorBloc.positionCost}"),
+                ResultItem("Position Risk",
+                    "${calculatorBloc.positionRisk} (${calculatorBloc.lostPercent}%)"),
+                ResultItem("Target Gain",
+                    "${calculatorBloc.targetGain} (${calculatorBloc.gainPercent}%)"),
+                ResultItem("R:R", "${calculatorBloc.rr}"),
               ],
             ),
           ),

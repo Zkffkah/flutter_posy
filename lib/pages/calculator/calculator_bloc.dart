@@ -5,7 +5,7 @@ import 'package:flutter_posy/bloc/bloc_provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class CalculatorBloc implements BlocBase {
-  static final int defaultMaxRisk = 2;
+  static final double defaultMaxRisk = 2;
 
   static final double defaultPositionSize = 1;
 
@@ -18,12 +18,12 @@ class CalculatorBloc implements BlocBase {
   //* Replacing above Dart StreamController with RxDart BehaviourSubject (which is a broadcast stream by default)
   //NOTE: We are leveraging the additional functionality from BehaviorSubject to go back in time and retrieve the lastest value of the streams for form submission
   //NOTE: Dart StreamController doesn't have such functionality
-  final _maxRiskController = BehaviorSubject<int>(seedValue: defaultMaxRisk);
+  final _maxRiskController = BehaviorSubject<double>(seedValue: defaultMaxRisk);
 
   // Add data to stream
-  Stream<int> get maxRisk => _maxRiskController.stream;
+  Stream<double> get maxRisk => _maxRiskController.stream;
 
-  Function(int) get changeMaxRisk => _maxRiskController.sink.add;
+  Function(double) get changeMaxRisk => _maxRiskController.sink.add;
 
   final _positionSizeController =
       BehaviorSubject<double>(seedValue: defaultPositionSize);
@@ -79,7 +79,9 @@ class CalculatorBloc implements BlocBase {
   Decimal positionCost;
   Decimal positionRisk;
   Decimal targetGain;
+  Decimal lostPercent;
   Decimal gainPercent;
+  Decimal rr;
 
   calculate() {
     print(_maxRiskController.value);
@@ -102,7 +104,9 @@ class CalculatorBloc implements BlocBase {
     positionCost = unitsToBuy * entryPrice;
     positionRisk = riskPercentage * positionSize;
     targetGain = unitsToBuy * (targetPrice - entryPrice);
+    lostPercent = (positionRisk / positionCost) * Decimal.fromInt(100);
     gainPercent = (targetGain / positionCost) * Decimal.fromInt(100);
+    rr = (gainPercent / lostPercent);
     print(unitsToBuy);
     print(positionCost);
     print(positionRisk);

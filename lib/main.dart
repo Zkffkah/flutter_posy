@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_posy/bloc/bloc_provider.dart';
 import 'package:flutter_posy/pages/home/home.dart';
 import 'package:flutter_posy/pages/home/home_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MyApp());
+import 'data/pref/pref_helper.dart';
+
+void main() async {
+  PrefHelper.prefs = await SharedPreferences.getInstance();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override

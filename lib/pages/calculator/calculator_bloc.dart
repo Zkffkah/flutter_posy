@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter_posy/bloc/bloc_provider.dart';
+import 'package:flutter_posy/data/pref/pref_helper.dart';
 import 'package:rxdart/rxdart.dart';
 
 class CalculatorBloc implements BlocBase {
   static final double defaultMaxRisk = 2;
 
-  static final double defaultPositionSize = 1;
+  static final double defaultPositionSize = PrefHelper().getPositionSize();
 
   static final double defaultEntryPrice = 0.00000100;
 
@@ -25,8 +26,7 @@ class CalculatorBloc implements BlocBase {
 
   Function(double) get changeMaxRisk => _maxRiskController.sink.add;
 
-  final _positionSizeController =
-      BehaviorSubject<double>(seedValue: defaultPositionSize);
+  final _positionSizeController = BehaviorSubject<double>();
 
   Stream<double> get positionSize => _positionSizeController.stream;
 
@@ -83,7 +83,7 @@ class CalculatorBloc implements BlocBase {
   Decimal gainPercent;
   Decimal rr;
 
-  calculate() {
+  calculate() async {
     print(_maxRiskController.value);
     print(_positionSizeController.value);
     print(_entryPriceController.value);
@@ -114,14 +114,19 @@ class CalculatorBloc implements BlocBase {
     print(gainPercent);
   }
 
-  CalculatorBloc() {}
+  CalculatorBloc() {
+    changePositionSize(PrefHelper().getPositionSize());
+    _positionSizeController.stream.debounce(Duration(microseconds: 1000)).listen((data) async{
+      await PrefHelper().setPositionSize(_positionSizeController.value.toString());
+    });
+  }
 
   @override
-  void dispose() {
+  void dispose() async {
     _maxRiskController.close();
     _positionSizeController.close();
     _stopPriceController.close();
     _targetPriceController.close();
-    _maxRiskController.close();
+    _entryPriceController.close();
   }
 }

@@ -74,28 +74,25 @@ class Calculator extends StatelessWidget {
                       flex: 2,
                       child: RadioItem(RadioModel(false, '0.5%', () {
                         _maxRiskTc.text = '0.5';
-                        _calculatorBloc
-                            .changeMaxRisk(0.5);
+                        _calculatorBloc.changeMaxRisk(0.5);
                       }))),
                   Expanded(
                       flex: 2,
                       child: RadioItem(RadioModel(false, '1%', () {
                         _maxRiskTc.text = '1';
-                        _calculatorBloc
-                            .changeMaxRisk(1);
+                        _calculatorBloc.changeMaxRisk(1);
                       }))),
                   Expanded(
                       flex: 2,
                       child: RadioItem(RadioModel(false, '2%', () {
                         _maxRiskTc.text = '2';
-                        _calculatorBloc
-                            .changeMaxRisk(2);
+                        _calculatorBloc.changeMaxRisk(2);
                       }))),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: StreamBuilder(
                   stream: _calculatorBloc.positionSize,
                   initialData: 1,
@@ -194,11 +191,11 @@ class Calculator extends StatelessWidget {
           builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
             return FloatingActionButton(
                 child: Icon(Icons.show_chart, color: Colors.white),
-                onPressed: !(snapshot.data)
+                onPressed: !(snapshot.hasData)
                     ? () {}
-                    : () {
+                    : () async {
                         // launch the registration process
-                        _calculatorBloc.calculate();
+                        await _calculatorBloc.calculate();
                         goToDialog(context, _calculatorBloc);
                       });
           }),

@@ -45,7 +45,7 @@ class Calculator extends StatelessWidget {
         Expanded(
           child: ListView(children: <Widget>[
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: <Widget>[
                   Expanded(
@@ -115,7 +115,7 @@ class Calculator extends StatelessWidget {
                   }),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: StreamBuilder(
                   stream: _calculatorBloc.entryPrice,
                   builder: (context, snapshot) {
@@ -138,7 +138,7 @@ class Calculator extends StatelessWidget {
                   }),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: StreamBuilder(
                   stream: _calculatorBloc.stopPrice,
                   builder: (context, snapshot) {
@@ -161,7 +161,7 @@ class Calculator extends StatelessWidget {
                   }),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: StreamBuilder(
                   stream: _calculatorBloc.targetPrice,
                   builder: (context, snapshot) {
